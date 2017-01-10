@@ -7,6 +7,7 @@ import spock.lang.Specification
 import java.rmi.activation.ActivationSystem
 import java.text.SimpleDateFormat
 import java.time.chrono.ChronoLocalDateTime
+import java.util.Locale
 
 import org.codehaus.groovy.control.customizers.ImportCustomizer.Import
 import org.json.JSONArray
@@ -70,13 +71,13 @@ class TimeLineSpec extends Specification {
 		JSONObject lastStatus = arr.getJSONObject(0);
 		def createdTimeLineResponse = lastStatus.getString("created_at");
 
-		SimpleDateFormat dateFormat = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy", Locale.ENGLISH);
 		Date date = dateFormat.parse(createdTimeLineResponse);
 
 		then:
 		response.getCode()==200;
 		createdTimeUpdateResponse==createdTimeLineResponse; //check that create time in update API response is the same as in time line API
-		currentTime - date.getTime() <3600; //check that less ten 1 minute passed after sendingRequst and creation time
+		currentTime - date.getTime() < 60000; //check that less ten 1 minute(60s, 60 000ms) passed after sendingRequst and creation time
 
 		cleanup:
 		TweeterAPI.sendStatusDestroyRequest(lastStatus.getString("id_str"));
@@ -109,7 +110,7 @@ class TimeLineSpec extends Specification {
 		retweetCount == "1";
 
 		cleanup:
-		TweeterAPI.sendStatusDestroyRequest(lastStatus.getString("id_str"));
+		TweeterAPI.sendStatusDestroyRequest(statusId);
 
 	}
 }
